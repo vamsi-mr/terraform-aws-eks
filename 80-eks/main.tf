@@ -3,7 +3,7 @@ module "eks" {
   version = "~> 21.0"   ## module version
 
   name = "${var.project}-${var.environment}"
-  kubernetes_version = "1.32"
+  kubernetes_version = "1.33"
 
   addons = {
     coredns = {}
@@ -33,7 +33,21 @@ module "eks" {
     eks_managed_node_groups = {
         blue = {
             ami_type = "AL2023_x86_64_STANDARD"
-            instance_types = ["m5.large", "c3.large", "c4.large", "c5.large"]
+            instance_types = ["m5.large"]
+            min_size = 2
+            max_size = 10
+            desired_size = 2
+
+            iam_role_additional_policies = {
+                AmazonEBSCSIDriverPolicy = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+                AmazonEFSCSIDriverPolicy = "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy"
+                AmazonEKSLoadBalancingPolicy = "arn:aws:iam::aws:policy/AmazonEKSLoadBalancingPolicy"
+            }      
+        }
+
+/*         green = {
+            ami_type = "AL2023_x86_64_STANDARD"
+            instance_types = ["m5.large"]
             min_size = 2
             max_size = 10
             desired_size = 2
@@ -43,9 +57,17 @@ module "eks" {
                 AmazonEFSCSIDriverPolicy = "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy"
                 AmazonEKSLoadBalancingPolicy = "arn:aws:iam::aws:policy/AmazonEKSLoadBalancingPolicy"
             }
-        }
+            
+            taints = {
+                upgrade = {
+                    key = "upgrade"
+                    value = "true"
+                    effect = "NO_SCHEDULE"
+                }
+            }    
+        } */
     }
-    
+
     tags = merge(
       local.common_tags,
         {
