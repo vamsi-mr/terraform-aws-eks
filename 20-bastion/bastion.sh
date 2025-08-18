@@ -45,3 +45,4 @@ yum install fontconfig java-21-openjdk jenkins -y
 systemctl daemon-reload
 systemctl start jenkins
 systemctl enable jenkins
+
