@@ -29,6 +29,35 @@ pipeline {
                 }
             }
         }
+        stage('plan') {
+            steps {
+                script {
+                    withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
+                        sh """
+                            cd 00-vpc
+                            terraform plan
+                        """
+                    }
+                }
+            }
+        }
+        stage('apply') { 
+            input {
+                message "Shoule we continue ?"
+                ok "Yes, we should."
+                submitter "vamsi"
+            }
+            steps {
+                script {
+                    withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
+                        sh """
+                            cd 00-vpc
+                            terraform plan
+                        """
+                    }
+                }
+            }
+        }
     }
 
     post {
