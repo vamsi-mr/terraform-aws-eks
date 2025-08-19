@@ -56,37 +56,40 @@ pipeline {
         }
         stage('Bastion ACM EKS') {
             parallel {
-                stage('apply') {
+                stage('Trigger Bastion') {
                     steps {
                         script {
                             withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
                                 sh """
-                                    cd 20-bastion
-                                    terraform apply -auto-approve
+                                    build job: '20-bastion', 
+                                    propagate: false,
+                                    wait: false
                                 """
                             }
                         }
                     }
                 }
-                stage('apply') {
+                stage('Trigger ACM') {
                     steps {
                         script {
                             withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
                                 sh """
-                                    cd 60-acm
-                                    terraform apply -auto-approve
+                                    build job: '60-acm', 
+                                    propagate: false,
+                                    wait: false
                                 """
                             }
                         }
                     }
                 }
-                stage('apply') {
+                stage('Trigger EKS') {
                     steps {
                         script {
                             withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
                                 sh """
-                                    cd 80-eks
-                                    terraform apply -auto-approve
+                                    build job: '80-eks', 
+                                    propagate: false,
+                                    wait: false
                                 """
                             }
                         }
@@ -99,8 +102,9 @@ pipeline {
                 script {
                     withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
                         sh """
-                            cd 70-Ingress-alb
-                            terraform apply -auto-approve
+                            build job: '70-Ingress-alb', 
+                            propagate: false,
+                            wait: false
                         """
                     }
                 }
