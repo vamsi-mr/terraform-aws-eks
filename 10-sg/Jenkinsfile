@@ -97,7 +97,7 @@ pipeline {
                 }
             }
         }
-        stage('apply') {
+        stage('Trigger ALB') {
             steps {
                 script {
                     withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
