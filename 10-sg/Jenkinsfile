@@ -17,7 +17,7 @@ pipeline {
         ansiColor('xterm')
     }
 
-    stages{ 
+    stages{
         stage('init') {
             steps {
                 script {
@@ -54,7 +54,59 @@ pipeline {
                 }
             }
         }
-    }
+        stage('Bastion ACM EKS') {
+            parallel {
+                stage('apply') {
+                    steps {
+                        script {
+                            withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
+                                sh """
+                                    cd 20-bastion
+                                    terraform apply -auto-approve
+                                """
+                            }
+                        }
+                    }
+                }
+                stage('apply') {
+                    steps {
+                        script {
+                            withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
+                                sh """
+                                    cd 60-acm
+                                    terraform apply -auto-approve
+                                """
+                            }
+                        }
+                    }
+                }
+                stage('apply') {
+                    steps {
+                        script {
+                            withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
+                                sh """
+                                    cd 80-eks
+                                    terraform apply -auto-approve
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage('apply') {
+            steps {
+                script {
+                    withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
+                        sh """
+                            cd 70-Ingress-alb
+                            terraform apply -auto-approve
+                        """
+                    }
+                }
+            }
+        }
+    }    
 
     post {
         always {
