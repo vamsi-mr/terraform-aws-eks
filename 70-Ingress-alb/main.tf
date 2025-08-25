@@ -47,3 +47,39 @@ resource "aws_route53_record" "ingress_alb" {
     evaluate_target_health = true
   }
 }
+
+resource "aws_lb_target_group" "frontend" {
+  name     = "${var.project}-${var.environment}-frontend" ## roboshop-dev-frontend
+  port     = 8080
+  protocol = "HTTP"
+  vpc_id   = local.vpc_id
+  target_type = "ip"
+
+  health_check {
+    enabled             = true
+    healthy_threshold   = 2
+    interval            = 15
+    matcher             = "200-299"
+    path                = "/"
+    port                = 8080
+    protocol            = "HTTP"
+    timeout             = 5
+    unhealthy_threshold = 3
+  }
+}
+
+resource "aws_lb_listener_rule" "frontend" {
+  listener_arn = aws_lb_listener.ingress_alb.arn
+  priority = 10
+
+  action {
+    type = "forward"
+    target_group_arn = aws_lb_target_group.frontend.arn
+  }
+
+  condition {
+    host_header {
+      values = ["${var.environment}.${var.domain_name}"]   ## dev.ravada.site
+    }
+  }
+}
