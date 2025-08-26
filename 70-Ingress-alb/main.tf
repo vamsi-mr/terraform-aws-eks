@@ -50,7 +50,7 @@ resource "aws_route53_record" "ingress_alb" {
 
 resource "aws_lb_target_group" "frontend" {
   name     = "${var.project}-${var.environment}-frontend" ## roboshop-dev-frontend
-  port     = 8080
+  port     = 80
   protocol = "HTTP"
   vpc_id   = local.vpc_id
   target_type = "ip"
@@ -61,7 +61,7 @@ resource "aws_lb_target_group" "frontend" {
     interval            = 15
     matcher             = "200-299"
     path                = "/"
-    port                = 8080
+    port                = 80
     protocol            = "HTTP"
     timeout             = 5
     unhealthy_threshold = 3
