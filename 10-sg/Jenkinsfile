@@ -21,7 +21,7 @@ pipeline {
         stage('init') {
             steps {
                 script {
-                    withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
+                    withAWS(credentials: 'aws-creds', region: 'us-east-1') {
                         sh """
                             cd 10-sg
                             terraform init -reconfigure
@@ -33,7 +33,7 @@ pipeline {
         stage('plan') {
             steps {
                 script {
-                    withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
+                    withAWS(credentials: 'aws-creds', region: 'us-east-1') {
                         sh """
                             cd 10-sg
                             terraform plan
@@ -45,7 +45,7 @@ pipeline {
         stage('apply') {
             steps {
                 script {
-                    withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
+                    withAWS(credentials: 'aws-creds', region: 'us-east-1') {
                         sh """
                             cd 10-sg
                             terraform apply -auto-approve
@@ -54,26 +54,13 @@ pipeline {
                 }
             }
         }
-        stage('Bastion ACM EKS') {
+        stage('Bastion & EKS') {
             parallel {
                 stage('Trigger Bastion') {
                     steps {
                         script {
-                            withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
-                                    build job: '20-bastion', 
-                                    propagate: false,
-                                    wait: false
-                            }
-                        }
-                    }
-                }
-                stage('Trigger ACM') {
-                    steps {
-                        script {
-                            withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
-                                    build job: '60-acm', 
-                                    propagate: false,
-                                    wait: false
+                            withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                                build job: '20-bastion', propagate: false, wait: false
                             }
                         }
                     }
@@ -81,23 +68,20 @@ pipeline {
                 stage('Trigger EKS') {
                     steps {
                         script {
-                            withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
-                                    build job: '80-eks', 
-                                    propagate: false,
-                                    wait: false
+                            withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                                build job: '80-eks', propagate: false, wait: false
                             }
                         }
                     }
                 }
             }
         }
-        stage('Trigger ALB') {
+        stage('Trigger ACM & ALB') {
             steps {
                 script {
-                    withAWS(credentials: 'aws-creds', region: 'us-east-1}') {
-                            build job: '70-Ingress-alb', 
-                            propagate: false,
-                            wait: false
+                    withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                        build job: '60-acm', propagate: true, wait: true
+                        build job: '70-Ingress-alb', propagate: false, wait: false
                     }
                 }
             }

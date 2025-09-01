@@ -199,3 +199,12 @@ resource "aws_security_group_rule" "eks_node_vpc" {
   cidr_blocks       = ["10.0.0.0/16"]
   security_group_id = module.eks_node.sg_id
 }
+
+resource "aws_security_group_rule" "eks_node_jenkins" {
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  source_security_group_id = data.aws_ssm_parameter.jenkins.value
+  security_group_id = module.eks_node.sg_id
+}
